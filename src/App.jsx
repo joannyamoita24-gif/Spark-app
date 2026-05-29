@@ -110,11 +110,9 @@ function MpesaModal({ amount, plan, onClose, onSuccess }) {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   async function handlePay() {
     if (!phone || phone.length < 9) { setError("Enter a valid phone number"); return; }
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       const fullPhone = "254" + phone.replace(/^0/, "");
       const res = await fetch(`${RAILWAY_URL}/pay`, {
@@ -123,18 +121,11 @@ function MpesaModal({ amount, plan, onClose, onSuccess }) {
         body: JSON.stringify({ phone: fullPhone, amount, plan })
       });
       const data = await res.json();
-      if (data.success) {
-        onSuccess();
-        alert("✅ Check your phone for the Mpesa prompt! Enter your PIN to complete.");
-      } else {
-        setError("Payment failed. Try again!");
-      }
-    } catch (err) {
-      setError("Connection error. Try again!");
-    }
+      if (data.success) { onSuccess(); alert("✅ Check your phone for the Mpesa prompt!"); }
+      else { setError("Payment failed. Try again!"); }
+    } catch (err) { setError("Connection error. Try again!"); }
     setLoading(false);
   }
-
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div style={{ background: "white", borderRadius: 24, padding: 32, maxWidth: 380, width: "100%", textAlign: "center" }}>
@@ -144,10 +135,8 @@ function MpesaModal({ amount, plan, onClose, onSuccess }) {
         {error && <div style={{ background: "#fff0f0", color: "#e84393", padding: "10px 14px", borderRadius: 10, marginBottom: 14, fontSize: 13 }}>{error}</div>}
         <label style={{ ...S.label, textAlign: "left" }}>Your Mpesa Number</label>
         <input style={S.input} type="tel" placeholder="e.g. 0712345678" value={phone} onChange={e => setPhone(e.target.value)} />
-        <div style={{ fontSize: 12, color: "#aaa", marginBottom: 16, textAlign: "left" }}>You'll receive an Mpesa prompt on your phone</div>
-        <button onClick={handlePay} disabled={loading} style={{ ...S.btn, opacity: loading ? 0.7 : 1 }}>
-          {loading ? "Sending prompt... ⏳" : `Pay KES ${amount} 💚`}
-        </button>
+        <div style={{ fontSize: 12, color: "#aaa", marginBottom: 16, textAlign: "left" }}>You will receive an Mpesa prompt on your phone</div>
+        <button onClick={handlePay} disabled={loading} style={{ ...S.btn, opacity: loading ? 0.7 : 1 }}>{loading ? "Sending prompt... ⏳" : `Pay KES ${amount} 💚`}</button>
         <button onClick={onClose} style={S.btnGhost}>Cancel</button>
       </div>
     </div>
@@ -161,13 +150,10 @@ function PremiumModal({ onClose, onUpgrade }) {
         <div style={{ fontSize: 52, marginBottom: 8 }}>👑</div>
         <div style={{ fontSize: 24, fontWeight: 800, color: "#e84393", marginBottom: 8 }}>Go Premium!</div>
         <div style={{ fontSize: 14, color: "#888", marginBottom: 24 }}>Unlock all features and find your match faster</div>
-        {[["💘 Unlimited Swipes", "No daily limit"], ["👀 See Who Liked You", "Know before you swipe"], ["⭐ Super Likes", "5 per day"], ["🌍 Worldwide Search", "Match globally"], ["🚀 Profile Boost", "10x more views"], ["💎 Verified Badge", "Stand out instantly"]].map(([f, d]) => (
+        {[["💘 Unlimited Swipes","No daily limit"],["👀 See Who Liked You","Know before you swipe"],["⭐ Super Likes","5 per day"],["🌍 Worldwide Search","Match globally"],["🚀 Profile Boost","10x more views"],["💎 Verified Badge","Stand out instantly"]].map(([f,d]) => (
           <div key={f} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid #f5f5f5", textAlign: "left" }}>
             <span style={{ fontSize: 20 }}>{f.split(" ")[0]}</span>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 14, color: "#1a1a2e" }}>{f.slice(3)}</div>
-              <div style={{ fontSize: 12, color: "#aaa" }}>{d}</div>
-            </div>
+            <div><div style={{ fontWeight: 700, fontSize: 14, color: "#1a1a2e" }}>{f.slice(3)}</div><div style={{ fontSize: 12, color: "#aaa" }}>{d}</div></div>
           </div>
         ))}
         <button onClick={onUpgrade} style={{ ...S.btn, marginTop: 20, fontSize: 16 }}>Pay KES 999/month via Mpesa 💚</button>
@@ -206,16 +192,14 @@ function GiftModal({ match, onClose, onSend }) {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 20 }}>
           {GIFTS.map(g => (
-            <div key={g.id} onClick={() => setSelected(g)} style={{ border: `2px solid ${selected?.id === g.id ? "#e84393" : "#f0e6f0"}`, borderRadius: 16, padding: 12, textAlign: "center", cursor: "pointer", background: selected?.id === g.id ? "#fff0f6" : "white" }}>
+            <div key={g.id} onClick={() => setSelected(g)} style={{ border: `2px solid ${selected?.id===g.id?"#e84393":"#f0e6f0"}`, borderRadius: 16, padding: 12, textAlign: "center", cursor: "pointer", background: selected?.id===g.id?"#fff0f6":"white" }}>
               <div style={{ fontSize: 32, marginBottom: 4 }}>{g.emoji}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: "#555" }}>{g.name}</div>
               <div style={{ fontSize: 12, color: "#e84393", fontWeight: 700 }}>KES {g.price}</div>
             </div>
           ))}
         </div>
-        <button onClick={() => selected && onSend(selected)} style={{ ...S.btn, opacity: selected ? 1 : 0.5 }}>
-          Send {selected ? `${selected.emoji} — KES ${selected.price}` : "a Gift"} 💝
-        </button>
+        <button onClick={() => selected && onSend(selected)} style={{ ...S.btn, opacity: selected?1:0.5 }}>Send {selected?`${selected.emoji} — KES ${selected.price}`:"a Gift"} 💝</button>
         <button onClick={onClose} style={S.btnGhost}>Cancel</button>
       </div>
     </div>
@@ -248,7 +232,7 @@ function MainApp({ user, onLogout }) {
 
   const filtered = sampleProfiles.filter(p =>
     p.distance <= maxDist && p.age >= minAge && p.age <= maxAge &&
-    (genderFilter === "everyone" || p.gender === genderFilter.slice(0, -1)) &&
+    (genderFilter === "everyone" || p.gender === genderFilter.slice(0,-1)) &&
     (ethnicityFilter === "All" || p.ethnicity === ethnicityFilter)
   );
   const current = filtered[cardIndex % Math.max(filtered.length, 1)];
@@ -270,8 +254,7 @@ function MainApp({ user, onLogout }) {
 
   function handleGiftSend(gift) {
     setMpesaConfig({ amount: gift.price, plan: `${gift.emoji} ${gift.name} Gift` });
-    setShowGift(false);
-    setShowMpesa(true);
+    setShowGift(false); setShowMpesa(true);
   }
 
   function handlePremiumUpgrade() {
@@ -288,15 +271,9 @@ function MainApp({ user, onLogout }) {
 
   function handleMpesaSuccess() {
     setShowMpesa(false);
-    if (mpesaConfig.plan === "Premium Subscription") {
-      setIsPremium(true);
-      setIsVerified(true);
-    } else if (mpesaConfig.plan === "Profile Boost") {
-      setIsBoosted(true);
-      setTimeout(() => setIsBoosted(false), 3600000);
-    } else {
-      setMessages(m => [...m, { from: "me", text: `Sent a gift! 💝` }]);
-    }
+    if (mpesaConfig.plan === "Premium Subscription") { setIsPremium(true); setIsVerified(true); }
+    else if (mpesaConfig.plan === "Profile Boost") { setIsBoosted(true); setTimeout(() => setIsBoosted(false), 3600000); }
+    else { setMessages(m => [...m, { from: "me", text: "Sent a gift! 💝" }]); }
   }
 
   return (
@@ -319,8 +296,8 @@ function MainApp({ user, onLogout }) {
           </div>
         </div>
         <div style={{ display: "flex" }}>
-          {[["discover", "🔍 Discover"], ["matches", "💞 Matches"], ["chat", "💬 Chat"], ["profile", "👤 Profile"]].map(([key, label]) => (
-            <button key={key} onClick={() => setTab(key)} style={{ flex: 1, padding: "10px 0", border: "none", background: "none", cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: tab === key ? 700 : 400, fontSize: 12, color: tab === key ? "#e84393" : "#aaa", borderBottom: tab === key ? "3px solid #e84393" : "3px solid transparent" }}>{label}</button>
+          {[["discover","🔍 Discover"],["matches","💞 Matches"],["chat","💬 Chat"],["profile","👤 Profile"]].map(([key,label]) => (
+            <button key={key} onClick={() => setTab(key)} style={{ flex: 1, padding: "10px 0", border: "none", background: "none", cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: tab===key?700:400, fontSize: 12, color: tab===key?"#e84393":"#aaa", borderBottom: tab===key?"3px solid #e84393":"3px solid transparent" }}>{label}</button>
           ))}
         </div>
       </div>
@@ -330,20 +307,18 @@ function MainApp({ user, onLogout }) {
         {tab === "discover" && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ color: "#bbb", fontSize: 13 }}>❤️ {liked} liked • {isPremium ? "∞ swipes" : `${swipesLeft}/${DAILY_SWIPE_LIMIT} left`}</div>
+              <div style={{ color: "#bbb", fontSize: 13 }}>❤️ {liked} liked • {isPremium?"∞ swipes":`${swipesLeft}/${DAILY_SWIPE_LIMIT} left`}</div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setShowBoost(true)} style={{ background: isBoosted ? "#3b82f6" : "#eff6ff", border: "none", borderRadius: 20, padding: "6px 12px", fontSize: 12, color: isBoosted ? "white" : "#3b82f6", cursor: "pointer", fontWeight: 600 }}>🚀 Boost</button>
-                <button onClick={() => setShowFilters(f => !f)} style={{ background: showFilters ? "#e84393" : "#fff0f6", border: "none", borderRadius: 20, padding: "6px 12px", fontSize: 12, color: showFilters ? "white" : "#e84393", cursor: "pointer", fontWeight: 600 }}>⚙️ Filter</button>
+                <button onClick={() => setShowBoost(true)} style={{ background: isBoosted?"#3b82f6":"#eff6ff", border: "none", borderRadius: 20, padding: "6px 12px", fontSize: 12, color: isBoosted?"white":"#3b82f6", cursor: "pointer", fontWeight: 600 }}>🚀 Boost</button>
+                <button onClick={() => setShowFilters(f => !f)} style={{ background: showFilters?"#e84393":"#fff0f6", border: "none", borderRadius: 20, padding: "6px 12px", fontSize: 12, color: showFilters?"white":"#e84393", cursor: "pointer", fontWeight: 600 }}>⚙️ Filter</button>
               </div>
             </div>
-
             {!isPremium && swipesLeft <= 3 && (
               <div onClick={() => setShowPremium(true)} style={{ background: "linear-gradient(135deg,#fff0f6,#fff7ed)", border: "2px solid #f97316", borderRadius: 12, padding: "10px 16px", marginBottom: 12, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ fontSize: 13, color: "#f97316", fontWeight: 600 }}>⚠️ Only {swipesLeft} swipes left!</div>
                 <div style={{ fontSize: 12, color: "#e84393", fontWeight: 700 }}>Go Premium →</div>
               </div>
             )}
-
             {showFilters && (
               <div style={{ background: "white", borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: "0 4px 20px rgba(232,67,147,0.1)", border: "1px solid #f0e6f0" }}>
                 <div style={{ fontWeight: 700, color: "#1a1a2e", marginBottom: 14 }}>🎯 Filter Profiles</div>
@@ -362,19 +337,18 @@ function MainApp({ user, onLogout }) {
                 </div>
                 <label style={S.label}>👤 Show me</label>
                 <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                  {["everyone", "men", "women"].map(g => (
-                    <button key={g} onClick={() => { setGenderFilter(g); setCardIndex(0); }} style={{ flex: 1, padding: "8px 0", borderRadius: 20, border: `2px solid ${genderFilter === g ? "#e84393" : "#f0e6f0"}`, background: genderFilter === g ? "#e84393" : "white", color: genderFilter === g ? "white" : "#888", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Georgia,serif", textTransform: "capitalize" }}>{g}</button>
+                  {["everyone","men","women"].map(g => (
+                    <button key={g} onClick={() => { setGenderFilter(g); setCardIndex(0); }} style={{ flex: 1, padding: "8px 0", borderRadius: 20, border: `2px solid ${genderFilter===g?"#e84393":"#f0e6f0"}`, background: genderFilter===g?"#e84393":"white", color: genderFilter===g?"white":"#888", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Georgia,serif", textTransform: "capitalize" }}>{g}</button>
                   ))}
                 </div>
                 <label style={S.label}>🌍 Ethnicity</label>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {["All", "Black", "White", "Asian", "Latino", "Mixed"].map(e => (
-                    <button key={e} onClick={() => { setEthnicityFilter(e); setCardIndex(0); }} style={{ padding: "7px 12px", borderRadius: 20, border: `2px solid ${ethnicityFilter === e ? "#e84393" : "#f0e6f0"}`, background: ethnicityFilter === e ? "#e84393" : "white", color: ethnicityFilter === e ? "white" : "#888", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Georgia,serif" }}>{e}</button>
+                  {["All","Black","White","Asian","Latino","Mixed"].map(e => (
+                    <button key={e} onClick={() => { setEthnicityFilter(e); setCardIndex(0); }} style={{ padding: "7px 12px", borderRadius: 20, border: `2px solid ${ethnicityFilter===e?"#e84393":"#f0e6f0"}`, background: ethnicityFilter===e?"#e84393":"white", color: ethnicityFilter===e?"white":"#888", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Georgia,serif" }}>{e}</button>
                   ))}
                 </div>
               </div>
             )}
-
             {filtered.length === 0 ? (
               <div style={{ textAlign: "center", padding: 60, color: "#bbb" }}>
                 <div style={{ fontSize: 48, marginBottom: 12 }}>😔</div>
@@ -384,9 +358,9 @@ function MainApp({ user, onLogout }) {
               <>
                 <div style={{ position: "relative", height: 440, marginBottom: 20 }}>
                   <div style={{ position: "absolute", inset: 0, borderRadius: 24, background: `linear-gradient(160deg,${next?.color}22,${next?.color}55)`, transform: "scale(0.95) translateY(10px)" }} />
-                  <div style={{ position: "absolute", inset: 0, borderRadius: 24, background: `linear-gradient(160deg,white 40%,${current?.color}33)`, boxShadow: `0 20px 60px ${current?.color}40`, border: `2px solid ${current?.color}55`, padding: 28, display: "flex", flexDirection: "column", justifyContent: "space-between", transform: swipeDir === "right" ? "translateX(120%) rotate(20deg)" : swipeDir === "left" ? "translateX(-120%) rotate(-20deg)" : "none", transition: swipeDir ? "transform 0.4s ease" : "none" }}>
-                    {swipeDir === "right" && <div style={{ position: "absolute", top: 20, right: 20, fontSize: 56 }}>💖</div>}
-                    {swipeDir === "left" && <div style={{ position: "absolute", top: 20, left: 20, fontSize: 56 }}>❌</div>}
+                  <div style={{ position: "absolute", inset: 0, borderRadius: 24, background: `linear-gradient(160deg,white 40%,${current?.color}33)`, boxShadow: `0 20px 60px ${current?.color}40`, border: `2px solid ${current?.color}55`, padding: 28, display: "flex", flexDirection: "column", justifyContent: "space-between", transform: swipeDir==="right"?"translateX(120%) rotate(20deg)":swipeDir==="left"?"translateX(-120%) rotate(-20deg)":"none", transition: swipeDir?"transform 0.4s ease":"none" }}>
+                    {swipeDir==="right" && <div style={{ position: "absolute", top: 20, right: 20, fontSize: 56 }}>💖</div>}
+                    {swipeDir==="left" && <div style={{ position: "absolute", top: 20, left: 20, fontSize: 56 }}>❌</div>}
                     <div>
                       <div style={{ fontSize: 72, textAlign: "center", marginBottom: 8 }}>{current?.emoji}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -405,10 +379,10 @@ function MainApp({ user, onLogout }) {
                 </div>
                 <div style={{ display: "flex", justifyContent: "center", gap: 16, alignItems: "center" }}>
                   <button onClick={() => swipe("left")} style={{ width: 65, height: 65, borderRadius: "50%", border: "2px solid #fca5a5", background: "white", fontSize: 26, cursor: "pointer", boxShadow: "0 4px 20px rgba(239,68,68,0.2)" }}>✕</button>
-                  <button onClick={() => isPremium ? null : setShowPremium(true)} style={{ width: 58, height: 58, borderRadius: "50%", border: `2px solid ${isPremium ? "#facc15" : "#f0e6f0"}`, background: "white", fontSize: 24, cursor: "pointer", opacity: isPremium ? 1 : 0.5 }}>⭐</button>
+                  <button onClick={() => isPremium?null:setShowPremium(true)} style={{ width: 58, height: 58, borderRadius: "50%", border: `2px solid ${isPremium?"#facc15":"#f0e6f0"}`, background: "white", fontSize: 24, cursor: "pointer", opacity: isPremium?1:0.5 }}>⭐</button>
                   <button onClick={() => swipe("right")} style={{ width: 80, height: 80, borderRadius: "50%", border: "none", background: "linear-gradient(135deg,#e84393,#f97316)", fontSize: 34, cursor: "pointer", boxShadow: "0 8px 30px rgba(232,67,147,0.4)", color: "white" }}>♥</button>
                   <button onClick={() => setShowBoost(true)} style={{ width: 58, height: 58, borderRadius: "50%", border: "2px solid #bfdbfe", background: "white", fontSize: 24, cursor: "pointer" }}>🚀</button>
-                  <button onClick={() => isPremium ? null : setShowPremium(true)} style={{ width: 65, height: 65, borderRadius: "50%", border: `2px solid ${isPremium ? "#34d399" : "#f0e6f0"}`, background: "white", fontSize: 26, cursor: "pointer", opacity: isPremium ? 1 : 0.5 }}>↩️</button>
+                  <button onClick={() => isPremium?null:setShowPremium(true)} style={{ width: 65, height: 65, borderRadius: "50%", border: `2px solid ${isPremium?"#34d399":"#f0e6f0"}`, background: "white", fontSize: 26, cursor: "pointer", opacity: isPremium?1:0.5 }}>↩️</button>
                 </div>
               </>
             )}
@@ -425,7 +399,7 @@ function MainApp({ user, onLogout }) {
               </div>
             )}
             <div style={{ fontSize: 20, fontWeight: 800, color: "#1a1a2e", marginBottom: 20 }}>Your Matches 💞</div>
-            {sampleProfiles.slice(0, 4).map(m => (
+            {sampleProfiles.slice(0,4).map(m => (
               <div key={m.id} onClick={() => { setActiveMatch(m); setTab("chat"); }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "white", borderRadius: 16, cursor: "pointer", boxShadow: `0 2px 16px ${m.color}25`, border: `1px solid ${m.color}33`, marginBottom: 10 }}>
                 <div style={{ width: 52, height: 52, borderRadius: "50%", background: `linear-gradient(135deg,${m.color}66,${m.color})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, position: "relative" }}>
                   {m.emoji}
@@ -445,22 +419,22 @@ function MainApp({ user, onLogout }) {
           <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 200px)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
               <button onClick={() => setTab("matches")} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#e84393" }}>←</button>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", background: activeMatch ? `linear-gradient(135deg,${activeMatch.color}66,${activeMatch.color})` : "linear-gradient(135deg,#f87171,#f87171)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{activeMatch?.emoji || "🌺"}</div>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: activeMatch?`linear-gradient(135deg,${activeMatch.color}66,${activeMatch.color})`:"linear-gradient(135deg,#f87171,#f87171)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{activeMatch?.emoji||"🌺"}</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, color: "#1a1a2e" }}>{activeMatch?.name || "Amara"}</div>
+                <div style={{ fontWeight: 800, color: "#1a1a2e" }}>{activeMatch?.name||"Amara"}</div>
                 <div style={{ fontSize: 12, color: "#34d399" }}>● Online</div>
               </div>
               <button onClick={() => setShowGift(true)} style={{ background: "#fff0f6", border: "none", borderRadius: 20, padding: "6px 14px", fontSize: 13, color: "#e84393", cursor: "pointer", fontWeight: 600 }}>🎁 Gift</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
-              {messages.map((msg, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: msg.from === "me" ? "flex-end" : "flex-start" }}>
-                  <div style={{ maxWidth: "75%", padding: "11px 16px", borderRadius: msg.from === "me" ? "20px 20px 4px 20px" : "20px 20px 20px 4px", background: msg.from === "me" ? "linear-gradient(135deg,#e84393,#f97316)" : "white", color: msg.from === "me" ? "white" : "#1a1a2e", fontSize: 14, boxShadow: msg.from === "me" ? "0 4px 16px rgba(232,67,147,0.3)" : "0 2px 10px rgba(0,0,0,0.06)" }}>{msg.text}</div>
+              {messages.map((msg,i) => (
+                <div key={i} style={{ display: "flex", justifyContent: msg.from==="me"?"flex-end":"flex-start" }}>
+                  <div style={{ maxWidth: "75%", padding: "11px 16px", borderRadius: msg.from==="me"?"20px 20px 4px 20px":"20px 20px 20px 4px", background: msg.from==="me"?"linear-gradient(135deg,#e84393,#f97316)":"white", color: msg.from==="me"?"white":"#1a1a2e", fontSize: 14, boxShadow: msg.from==="me"?"0 4px 16px rgba(232,67,147,0.3)":"0 2px 10px rgba(0,0,0,0.06)" }}>{msg.text}</div>
                 </div>
               ))}
             </div>
             <div style={{ display: "flex", gap: 10, alignItems: "center", paddingTop: 12, borderTop: "1px solid #f0f0f0", marginTop: 10 }}>
-              <input value={message} onChange={e => setMessage(e.target.value)} onKeyDown={e => e.key === "Enter" && sendMsg()} placeholder="Type a message..." style={{ flex: 1, padding: "12px 18px", borderRadius: 24, border: "2px solid #f0e6f0", fontFamily: "Georgia,serif", fontSize: 14, outline: "none" }} />
+              <input value={message} onChange={e => setMessage(e.target.value)} onKeyDown={e => e.key==="Enter"&&sendMsg()} placeholder="Type a message..." style={{ flex: 1, padding: "12px 18px", borderRadius: 24, border: "2px solid #f0e6f0", fontFamily: "Georgia,serif", fontSize: 14, outline: "none" }} />
               <button onClick={sendMsg} style={{ width: 46, height: 46, borderRadius: "50%", border: "none", background: "linear-gradient(135deg,#e84393,#f97316)", color: "white", fontSize: 20, cursor: "pointer" }}>➤</button>
             </div>
           </div>
@@ -486,10 +460,10 @@ function MainApp({ user, onLogout }) {
             )}
             <div style={{ background: "white", borderRadius: 16, padding: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.06)", marginBottom: 16 }}>
               <div style={{ fontWeight: 700, color: "#1a1a2e", marginBottom: 14 }}>Your Info</div>
-              {[["Age", user.age || "Not set"], ["Job", user.job || "Not set"], ["Bio", user.bio || "Not set"], ["Plan", isPremium ? "👑 Premium" : "Free"]].map(([k, v]) => (
+              {[["Age",user.age||"Not set"],["Job",user.job||"Not set"],["Bio",user.bio||"Not set"],["Plan",isPremium?"👑 Premium":"Free"]].map(([k,v]) => (
                 <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f5f5f5" }}>
                   <span style={{ color: "#888", fontSize: 14 }}>{k}</span>
-                  <span style={{ color: k === "Plan" && isPremium ? "#e84393" : "#1a1a2e", fontSize: 14, fontWeight: 600 }}>{v}</span>
+                  <span style={{ color: k==="Plan"&&isPremium?"#e84393":"#1a1a2e", fontSize: 14, fontWeight: 600 }}>{v}</span>
                 </div>
               ))}
             </div>
