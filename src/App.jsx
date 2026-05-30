@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const DAILY_SWIPE_LIMIT = 10;
-const RAILWAY_URL = "https://spark-app-production-cde2.up.railway.app";
+const RENDER_URL = "https://spark-mpesa.onrender.com";
 
 const sampleProfiles = [
   { id: 1, name: "Amara", age: 26, job: "Fashion Designer", distance: 2, gender: "woman", ethnicity: "Black", bio: "Nairobi born, world traveler 🌍 Love art, good food and deep talks.", tags: ["Fashion", "Travel", "Art"], color: "#f87171", emoji: "🌺", verified: true },
@@ -110,22 +110,32 @@ function MpesaModal({ amount, plan, onClose, onSuccess }) {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [paid, setPaid] = useState(false);
+
   async function handlePay() {
     if (!phone || phone.length < 9) { setError("Enter a valid phone number"); return; }
     setLoading(true); setError("");
     try {
       const fullPhone = "254" + phone.replace(/^0/, "");
-      const res = await fetch(`${RAILWAY_URL}/pay`, {
+      const res = await fetch(`${RENDER_URL}/pay`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: fullPhone, amount, plan })
       });
       const data = await res.json();
-      if (data.success) { onSuccess(); alert("✅ Check your phone for the Mpesa prompt!"); }
-      else { setError("Payment failed. Try again!"); }
-    } catch (err) { setError("Connection error. Try again!"); }
+      if (data.success) {
+        setPaid(true);
+        alert("✅ Check your phone for the Mpesa prompt! Enter your PIN to complete.");
+        onSuccess();
+      } else {
+        setError("Payment failed: " + (data.error || "Try again"));
+      }
+    } catch (err) {
+      setError("Connection error. Try again!");
+    }
     setLoading(false);
   }
+
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div style={{ background: "white", borderRadius: 24, padding: 32, maxWidth: 380, width: "100%", textAlign: "center" }}>
@@ -136,7 +146,9 @@ function MpesaModal({ amount, plan, onClose, onSuccess }) {
         <label style={{ ...S.label, textAlign: "left" }}>Your Mpesa Number</label>
         <input style={S.input} type="tel" placeholder="e.g. 0712345678" value={phone} onChange={e => setPhone(e.target.value)} />
         <div style={{ fontSize: 12, color: "#aaa", marginBottom: 16, textAlign: "left" }}>You will receive an Mpesa prompt on your phone</div>
-        <button onClick={handlePay} disabled={loading} style={{ ...S.btn, opacity: loading ? 0.7 : 1 }}>{loading ? "Sending prompt... ⏳" : `Pay KES ${amount} 💚`}</button>
+        <button onClick={handlePay} disabled={loading || paid} style={{ ...S.btn, opacity: loading ? 0.7 : 1 }}>
+          {loading ? "Sending prompt... ⏳" : paid ? "✅ Prompt Sent!" : `Pay KES ${amount} 💚`}
+        </button>
         <button onClick={onClose} style={S.btnGhost}>Cancel</button>
       </div>
     </div>
@@ -225,7 +237,7 @@ function MainApp({ user, onLogout }) {
   const [showBoost, setShowBoost] = useState(false);
   const [showGift, setShowGift] = useState(false);
   const [showMpesa, setShowMpesa] = useState(false);
-  const [mpesaConfig, setMpesaConfig] = useState({ amount: 999, plan: "Premium" });
+  const [mpesaConfig, setMpesaConfig] = useState({ amount: 999, plan: "Premium Subscription" });
   const [isBoosted, setIsBoosted] = useState(false);
   const [swipesLeft, setSwipesLeft] = useState(DAILY_SWIPE_LIMIT);
   const [isVerified, setIsVerified] = useState(false);
@@ -254,7 +266,8 @@ function MainApp({ user, onLogout }) {
 
   function handleGiftSend(gift) {
     setMpesaConfig({ amount: gift.price, plan: `${gift.emoji} ${gift.name} Gift` });
-    setShowGift(false); setShowMpesa(true);
+    setShowGift(false);
+    setShowMpesa(true);
   }
 
   function handlePremiumUpgrade() {
@@ -271,9 +284,19 @@ function MainApp({ user, onLogout }) {
 
   function handleMpesaSuccess() {
     setShowMpesa(false);
-    if (mpesaConfig.plan === "Premium Subscription") { setIsPremium(true); setIsVerified(true); }
-    else if (mpesaConfig.plan === "Profile Boost") { setIsBoosted(true); setTimeout(() => setIsBoosted(false), 3600000); }
-    else { setMessages(m => [...m, { from: "me", text: "Sent a gift! 💝" }]); }
+    if (mpesaConfig.plan === "Premium Subscription") {
+      setIsPremium(true);
+      setIsVerified(true);
+    } else if (mpesaConfig.plan === "Profile Boost") {
+      setIsBoosted(true);
+      setTimeout(() => setIsBoosted(false), 3600000);
+    } else {
+      setMessages(m => [...m, { from: "me", text: "Sent a gift! 💝" }]);
+    }
+  }
+
+  function handleMpesaClose() {
+    setShowMpesa(false);
   }
 
   return (
@@ -281,7 +304,7 @@ function MainApp({ user, onLogout }) {
       {showPremium && <PremiumModal onClose={() => setShowPremium(false)} onUpgrade={handlePremiumUpgrade} />}
       {showBoost && <BoostModal onClose={() => setShowBoost(false)} onBuy={handleBoostBuy} />}
       {showGift && <GiftModal match={activeMatch} onClose={() => setShowGift(false)} onSend={handleGiftSend} />}
-      {showMpesa && <MpesaModal amount={mpesaConfig.amount} plan={mpesaConfig.plan} onClose={() => setShowMpesa(false)} onSuccess={handleMpesaSuccess} />}
+      {showMpesa && <MpesaModal amount={mpesaConfig.amount} plan={mpesaConfig.plan} onClose={handleMpesaClose} onSuccess={handleMpesaSuccess} />}
 
       <div style={{ width: "100%", maxWidth: 480, background: "white", padding: "16px 24px 0", boxShadow: "0 2px 20px rgba(0,0,0,0.06)", position: "sticky", top: 0, zIndex: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -303,7 +326,6 @@ function MainApp({ user, onLogout }) {
       </div>
 
       <div style={{ width: "100%", maxWidth: 480, padding: "20px 16px", flex: 1 }}>
-
         {tab === "discover" && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
