@@ -13,7 +13,7 @@ async function getToken() {
     `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
   ).toString('base64');
   const res = await axios.get(
-    'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
+    'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
     { headers: { Authorization: `Basic ${auth}` } }
   );
   return res.data.access_token;
@@ -28,7 +28,7 @@ app.post('/pay', async (req, res) => {
       `${process.env.MPESA_SHORTCODE}${process.env.MPESA_PASSKEY}${timestamp}`
     ).toString('base64');
     const response = await axios.post(
-      'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
+      'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
       {
         BusinessShortCode: process.env.MPESA_SHORTCODE,
         Password: password,
@@ -38,7 +38,7 @@ app.post('/pay', async (req, res) => {
         PartyA: phone,
         PartyB: process.env.MPESA_SHORTCODE,
         PhoneNumber: phone,
-        CallBackURL: 'https://spark-app.vercel.app/callback',
+        CallBackURL: 'https://spark-dating-sable.vercel.app/callback',
         AccountReference: 'SparkDating',
         TransactionDesc: `Spark ${plan} Payment`
       },
@@ -50,4 +50,8 @@ app.post('/pay', async (req, res) => {
   }
 });
 
-app.listen(3001, () => console.log('Mpesa server running on port 3001'));
+app.get('/', (req, res) => {
+  res.json({ status: 'Spark Mpesa server is running 🚀' });
+});
+
+app.listen(process.env.PORT || 3001, () => console.log('Mpesa server running ✅'));
